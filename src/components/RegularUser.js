@@ -112,7 +112,7 @@ export default class RegularUser extends Component {
 
         ImagePicker.launchCamera(options, (response) => {
             if (response.didCancel) {
-                console.log('User cancelled image picker');
+                Alert.alert('User Cancelled Taking photo')
               } 
               else{
             this.imageBlob(response.uri)
