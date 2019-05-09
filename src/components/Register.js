@@ -277,6 +277,7 @@ class Register extends Component {
 
 }
 
+
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
