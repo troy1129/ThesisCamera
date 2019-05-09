@@ -36,6 +36,7 @@ export default class LoadingScreen extends Component {
             resizeMode: 'contain'
           }} 
           source={require('../images/loading_screen.gif')} />
+          
         <Text 
           style = {{
             height: '10%',
