@@ -133,7 +133,7 @@ class Register extends Component {
 
     render() {
         return (
-            <Formik initialValues={{ firstName: '', lastName: '', email: '', contactNumber: '', password: '' }}
+            <Formik initialValues={{ firstName: '', lastName: '', email: '', contactNumber: '', password: '',confirmPassword:'' }}
                 onSubmit={values => {
                     this.createUserAccount(values);
 
@@ -165,6 +165,19 @@ class Register extends Component {
                             .matches(/[a-zA-Z0-9]/, 'Password cannot contain Special Characters')
                             .trim('Name cannot contain Special Characters or Numbers')
                             .required('Password is Required'),
+                         confirmPassword: yup
+                            .string()
+                            .strict(true)
+                            .matches(/[a-zA-Z0-9]/, 'Password cannot contain Special Characters')
+                            .trim('Name cannot contain Special Characters or Numbers')
+                            .required('You Must Confirm Password')
+                            .when("password", {
+                                is: val => (val && val.length > 0 ? true : false),
+                                then: yup.string().oneOf(
+                                  [yup.ref("password")],
+                                  "Both password need to be the same"
+                                )
+                              })
                     })
                 }>
                 {({ values, handleChange, errors, setFieldTouched, touched, isValid, handleSubmit }) => (
@@ -233,6 +246,19 @@ class Register extends Component {
                         />
                         {touched.password && errors.password &&
                             <Text style={{ fontSize: 15, color: 'red' }}>{errors.password}</Text>
+                        }
+                        <TextInput style={styles.inputBox}
+                            underlineColorAndroid='rgba(0,0,0,0)'
+                            placeholder="Confirm Password"
+                            secureTextEntry={true}
+                            placeholderTextColor="#ffffff"
+                            value={values.confirmPassword}
+                            onChangeText={handleChange('confirmPassword')}
+                            onBlur={() => setFieldTouched('confirmPassword')}
+
+                        />
+                        {touched.confirmPassword && errors.confirmPassword &&
+                            <Text style={{ fontSize: 15, color: 'red' }}>{errors.confirmPassword}</Text>
                         }
                         <RadioGroup radioButtons={this.state.data} onPress={this.userType} />
                         <TouchableOpacity style={styles.button}

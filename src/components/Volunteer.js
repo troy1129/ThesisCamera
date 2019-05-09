@@ -25,57 +25,6 @@ const TAB_BAR_HEIGHT = 100;
 
 export default class Volunteer extends Component {
 
-    renderContent = () => {
-        const { isImageViewVisible, imageIndex } = this.state;
-        const images = [
-            {
-                source: {
-                    uri: this.state.image_uri
-                },
-            },
-        ];
-        return (
-            <View>
-                <Text style={{
-                    fontSize: 20,
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                    marginTop: 5
-                }}>
-                    {this.state.incidentType}
-                </Text>
-                <Text style={{
-                    fontSize: 19,
-                    textAlign: 'center',
-                    marginBottom: 10
-                }}>
-                    {this.state.incidentLocation}
-                </Text>
-                <TouchableOpacity
-                    onPress={() => {
-                        this.setState({
-                            isImageViewVisible: true,
-                        });
-                    }}
-                >
-                     <Image source={{ uri: this.state.image_uri }} style={{
-                        width: 100, height: 100,
-                        marginBottom: 15, left: 100
-                    }}></Image>
-                </TouchableOpacity>
-                <ImageView
-                    glideAlways
-                    style={{ flex: 1, width: undefined, height: undefined }}
-                    images={images}
-                    imageIndex={imageIndex}
-                    animationType="fade"
-                    isVisible={isImageViewVisible}
-                    renderFooter={this.renderFooter}
-                    onClose={() => this.setState({ isImageViewVisible: false })}
-                />
-            </View>
-        )
-    }
     _isMounted = false;
     constructor(props) {
         super(props);
@@ -177,7 +126,7 @@ export default class Volunteer extends Component {
 
         app.database().ref(`incidents/${incidentID}`).update({
             isRespondingVolunteer: true,
-            // image_uri: this.state.image_uri,
+             image_uri: this.state.image_uri,
             unrespondedVolunteer: false,
             volunteerResponding: this.state.userId,
             timeReceiveVolunteer: date1
@@ -593,7 +542,7 @@ export default class Volunteer extends Component {
     }
 
     renderContent = () => {
-        const { isImageViewVisible, imageIndex } = this.state;
+        const { isImageViewVisible} = this.state;
         const images = [
             {
                 source: {
@@ -631,7 +580,7 @@ export default class Volunteer extends Component {
                             disabled={!this.state.image_uri}
                         >
                     <Image source={{uri:this.state.image_uri}} style={{width:100, height:100,
-                        marginBottom: 15, left: 500}}></Image>
+                        marginBottom: 15, left: 100}}></Image>
                     </TouchableOpacity>
                     <ImageView
                     glideAlways

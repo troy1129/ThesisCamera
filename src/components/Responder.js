@@ -41,7 +41,6 @@ export default class Responder extends Component {
     constructor(props) {
         super(props);
         this.getImage = this.getImage.bind(this)
-        this.geProfileImage = this.getProfileImage.bind(this)
 
         this.state = {
             isModalVisible: false,
@@ -134,23 +133,14 @@ export default class Responder extends Component {
           }
         )};
 
-        getProfileImage(){
-    
-            ImagePicker.showImagePicker(options, (response) => {
-              this.imageBlob(response.uri)
-                .then(alert('Uploading Please Wait!'), this.setState({uploading:true}), console.log(this.state.uploading))
-                .then(url => { alert('Photo has been Uploaded'); this.setState({profilePhoto: url, uploading:false}); console.log(this.state.uploading) })
-                .catch(error => console.log(error))
-        
-              }
-            )};
+
     
          
     imageBlob(uri, mime = 'application/octet-stream') {
         return new Promise((resolve, reject) => {
             const uploadUri = Platform.OS === 'ios' ? uri.replace('file://', '') : uri
             let uploadBlob = null
-            const imageRef = app.storage().ref('images').child(`/Responder/Reports/${this.state.userId}`)
+            const imageRef = app.storage().ref('images').child(`/Responder/${this.state.userId}`)
 
             fs.readFile(uploadUri, 'base64')
                 .then((data) => {
@@ -174,33 +164,7 @@ export default class Responder extends Component {
         })
     }
 
-    imageProfileBlob(uri, mime = 'application/octet-stream') {
-        return new Promise((resolve, reject) => {
-            const uploadUri = Platform.OS === 'ios' ? uri.replace('file://', '') : uri
-            let uploadBlob = null
-            const imageRef = app.storage().ref('images').child(`/Responder/Profiles/${this.state.userId}`)
-
-            fs.readFile(uploadUri, 'base64')
-                .then((data) => {
-                    return Blob.build(data, { type: `${mime};BASE64` })
-                })
-                .then((blob) => {
-                    uploadBlob = blob
-                    return imageRef.put(blob, { contentType: mime })
-                })
-                .then(() => {
-                    uploadBlob.close()
-                    return imageRef.getDownloadURL()
-                })
-                .then((url) => {
-                    resolve(url)
-                    console.log(url)
-                })
-                .catch((error) => {
-                    reject(error)
-                })
-        })
-    }
+ 
 
     authListener() {
         // this._isMounted = true;
@@ -1076,7 +1040,7 @@ export default class Responder extends Component {
                     <Button
                     style={{ fontSize: 18, color: 'white' }}
                     onPress={this.getImage}
-
+                    disabled={this.state.uploading}
                     containerStyle={{
                      padding: 8,
                      marginLeft: 70,
@@ -1103,7 +1067,7 @@ export default class Responder extends Component {
                             marginTop: 20,
 
                         }}
-                        disabled={!this.state.destinationPlaceId || !this.state.incidentLocation || !this.state.incidentType}
+                        disabled={!this.state.destinationPlaceId || !this.state.incidentLocation || !this.state.incidentType || this.state.uploading}
                     >
 
                         <Text style={{ justifyContent: 'center', color: 'white' }} >Submit Incident</Text>

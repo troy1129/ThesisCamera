@@ -116,9 +116,9 @@ export default class RegularUser extends Component {
               } 
               else{
             this.imageBlob(response.uri)
-                .then(url => { alert('uploaded'); this.setState({ image_uri: url }) })
-                .then(console.log(this.state.image_uri))
-                .catch(error => console.log(error))
+            .then(alert('Uploading Please Wait!'), this.setState({uploading:true}), console.log(this.state.uploading))
+            .then(url => { alert('Photo has been Uploaded'); this.setState({image_uri: url, uploading:false}); console.log(this.state.uploading) })
+            .catch(error => console.log(error))
               }
 
         }
@@ -988,6 +988,7 @@ export default class RegularUser extends Component {
                     <Button
                         style={{ fontSize: 18, color: "white" }}
                         onPress={this.getImage}
+                        disabled={this.state.uploading}
                         containerStyle={{
                             padding: 8,
                             marginLeft: 70,
@@ -1003,10 +1004,11 @@ export default class RegularUser extends Component {
             </Text>
                     </Button>
 
+                        
                     <Button
                         style={{ fontSize: 18, color: 'white' }}
                         onPress={this.submitIncidentHandler}
-                        disabled={!this.state.destinationPlaceId || !this.state.incidentLocation || !this.state.incidentType}
+                        disabled={!this.state.destinationPlaceId || !this.state.incidentLocation || !this.state.incidentType || this.state.uploading}
                         containerStyle={{
                             padding: 8,
                             marginLeft: 70,
