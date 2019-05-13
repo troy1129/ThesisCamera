@@ -1,0 +1,4 @@
+#Sat May 11 04:41:18 SGT 2019
+base.0=E\:\\THESIS STUFF\\May8,2016\\Updated\\MobileApp-lester\\MobileApp-lester\\android\\app\\build\\intermediates\\transforms\\dexMerger\\release\\0
+path.0=classes.dex
+renamed.0=classes.dex

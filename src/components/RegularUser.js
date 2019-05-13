@@ -1,8 +1,7 @@
-
-import RNFetchBlob from 'react-native-fetch-blob'
+import RNFetchBlob from 'react-native-fetch-blob';
 var ImagePicker = require('react-native-image-picker');
 import React, { Component } from "react";
-import { Platform, Text, TouchableOpacity, View, Image, Dimensions, TextInput, StyleSheet, TouchableHighlight, Keyboard, Alert } from "react-native";
+import { Platform, Text, TouchableOpacity, View, Image, Dimensions, TextInput, StyleSheet, TouchableHighlight, Keyboard, Alert, BackHandler } from "react-native";
 import Modal from 'react-native-modal';
 import BottomDrawer from 'rn-bottom-drawer';
 import ActionButton, { ActionButtonItem } from 'react-native-action-button';
@@ -23,10 +22,10 @@ import Routes from '../Routes';
 
 var options = {
 };
-const Blob = RNFetchBlob.polyfill.Blob
-const fs = RNFetchBlob.fs
-window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest
-window.Blob = Blob
+const Blob = RNFetchBlob.polyfill.Blob;
+const fs = RNFetchBlob.fs;
+window.XMLHttpRequest = RNFetchBlob.polyfill.XMLHttpRequest;
+window.Blob = Blob;
 
 var screen = Dimensions.get('window');
 
@@ -42,7 +41,7 @@ export default class RegularUser extends Component {
             hasVolunteerAlerted: false,
             userKey: "",
             userType: '',
-            incidentType: "",
+            incidentType: "Vehicular Accident",
             incidentLocation: "",
             firstName: "",
             lastName: "",
@@ -62,7 +61,7 @@ export default class RegularUser extends Component {
             incidentUserKey: '',
             incidentPhoto: '',
             reportedBy: '',
-            timeReceive: '',
+            timeReceived: '',
             timeResponded: '',
             responderResponding: '',
             volunteerResponding: '',
@@ -113,18 +112,42 @@ export default class RegularUser extends Component {
         ImagePicker.launchCamera(options, (response) => {
             if (response.didCancel) {
                 Alert.alert('User Cancelled Taking photo')
-              } 
-              else{
-            this.imageBlob(response.uri)
-            .then(alert('Uploading Please Wait!'), this.setState({uploading:true}), console.log(this.state.uploading))
-            .then(url => { alert('Photo has been Uploaded'); this.setState({image_uri: url, uploading:false}); console.log(this.state.uploading) })
-            .catch(error => console.log(error))
-              }
+            }
+            else {
+                this.imageBlob(response.uri)
+                    .then(alert('Uploading Please Wait!'), this.setState({ uploading: true }), console.log(this.state.uploading))
+                    .then(url => { alert('Photo has been Uploaded'); this.setState({ image_uri: url, uploading: false }); console.log(this.state.uploading) })
+                    .catch(error => console.log(error))
+            }
 
         }
         )
     };
 
+    componentWillMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.onBackPress);
+    }
+
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.onBackPress);
+    }
+
+    onBackPress = () => {
+
+        //Code to display alert message when use click on android device back button.
+        Alert.alert(
+            ' Exit From App ',
+            ' Do you want to exit Tabang! Application?',
+            [
+                { text: 'Yes', onPress: () => BackHandler.exitApp() },
+                { text: 'No', onPress: () => console.log('NO Pressed') }
+            ],
+            { cancelable: false },
+        );
+
+        // Return true to enable back button over ride.
+        return true;
+    }
 
     onPress = data => {
         this.setState({ data });
@@ -165,7 +188,7 @@ export default class RegularUser extends Component {
                 // profileType = dataUser.user_type;
             }
             that.setState({ userType, firstName, lastName });
-            console.log("USER TYPE", that.state.userType, that.state.firstName, that.state.lastName, that.state.userId)
+            console.log("USER TYPE", that.state.userType, that.state.firstName, that.state.lastName, that.state.userId);
 
             // app.database().ref(`mobileUsers/Regular User/${that.state.userId}`).update({
             //     incidentID: '',
@@ -233,7 +256,7 @@ export default class RegularUser extends Component {
     responderCoordinates = (responderRespondingID) => {
 
         console.log("Welcome RESPONDER", this.state.responderRespondingID);
-        this.userIncidentId = app.database().ref(`mobileUsers/Responder/${responderRespondingID}`)
+        this.userIncidentId = app.database().ref(`mobileUsers/Responder/${responderRespondingID}`);
         var latitude = '';
         var longitude = '';
         var that = this;
@@ -246,7 +269,7 @@ export default class RegularUser extends Component {
                 that.setState({
                     responderLat: latitude,
                     responderLng: longitude,
-                })
+                });
             })
         }
     }
@@ -254,7 +277,7 @@ export default class RegularUser extends Component {
     volunteerCoordinates = (volunteerRespondingID) => {
 
         console.log("Welcome Volunteer", this.state.volunteerRespondingID);
-        var userIncidentId = app.database().ref(`mobileUsers/Volunteer/${volunteerRespondingID}`)
+        var userIncidentId = app.database().ref(`mobileUsers/Volunteer/${volunteerRespondingID}`);
         var latitude = '';
         var longitude = '';
         var that = this;
@@ -267,7 +290,7 @@ export default class RegularUser extends Component {
                 that.setState({
                     volunteerLat: latitude,
                     volunteerLng: longitude,
-                })
+                });
             })
         }
     }
@@ -293,14 +316,14 @@ export default class RegularUser extends Component {
                 this.incidentIDListen = app.database().ref(`incidents/${incidentID}`)
                 this.incidentIDListen.on('value', (snapshot) => {
                     incidentDetails = snapshot.val() || null;
-                    var image_uri=incidentDetails.image_uri;
+                    var image_uri = incidentDetails.image_uri;
                     var markerLat = incidentDetails.coordinates.lat;
                     var markerLng = incidentDetails.coordinates.lng;
                     console.log("COORDINATES", markerLat, markerLng);
-                    var reportedBy = incidentDetails.reportedBy
+                    var reportedBy = incidentDetails.reportedBy;
                     var isSettled = incidentDetails.isSettled;
                     var incidentType = incidentDetails.incidentType;
-                    var incidentLocation = incidentDetails.incidentLocation
+                    var incidentLocation = incidentDetails.incidentLocation;
                     var destinationPlaceId = incidentDetails.destinationPlaceId;
                     console.log("DESTINATION PLACE", destinationPlaceId);
                     var incidentLocation = incidentDetails.incidentLocation;
@@ -308,7 +331,7 @@ export default class RegularUser extends Component {
 
                         that.incidentResponderListener(incidentID);
                         that.incidentVolunteerListener(incidentID);
-                        that.setState({ markerLat, markerLng, isSettled: false, incidentType, incidentLocation, isIncidentReady: true,image_uri });
+                        that.setState({ markerLat, markerLng, isSettled: false, incidentType, incidentLocation, isIncidentReady: true, image_uri });
                         that.getRouteDirection(destinationPlaceId, incidentLocation);
 
 
@@ -330,7 +353,7 @@ export default class RegularUser extends Component {
     incidentSettled = () => {
 
 
-        this.setState({ isSettled: true, isIncidentReady: false, hasResponderAlerted: false })
+        this.setState({ isSettled: true, isIncidentReady: false, hasResponderAlerted: false, hasVolunteerAlerted: false });
         this.setState({ markerCoords: null });
 
         Alert.alert(
@@ -357,7 +380,7 @@ export default class RegularUser extends Component {
     }
 
     incidentResponderListener = (incidentID) => {
-        console.log("naa ka diri?", incidentID)
+        console.log("naa ka diri?", incidentID);
         console.log("hi there", this.state.incidentID);
         this.responderListen = app.database().ref(`incidents/${incidentID}`)
         var that = this;
@@ -388,12 +411,12 @@ export default class RegularUser extends Component {
                     }
                     console.log("responder responding", responderRespondingID);
                     // that.setState({ responderRespondingID });
-                    that.responderCoordinates(responderRespondingID)
+                    that.responderCoordinates(responderRespondingID);
                 }
                 else {
                     console.log("responder NOT responding", responderRespondingID);
                     that.setState({ responderRespondingID });
-                    that.responderCoordinates(responderRespondingID)
+                    that.responderCoordinates(responderRespondingID);
                 }
 
             }
@@ -402,15 +425,15 @@ export default class RegularUser extends Component {
     }
 
     hasVolunteerAlert = () => {
-        var hasVolunteerAlerted = true;
-        this.setState({ hasVolunteerAlerted });
+        // var hasVolunteerAlerted = true;
+        this.setState({ hasVolunteerAlerted: true });
         console.log("ALERT HAS BEEN TRIGGERED");
     }
 
     incidentVolunteerListener = (incidentID) => {
-        console.log("naa ka diri?", incidentID)
+        console.log("naa ka diri?", incidentID);
         console.log("hi there", this.state.incidentID);
-        this.volunteerListen = app.database().ref(`incidents/${incidentID}`)
+        this.volunteerListen = app.database().ref(`incidents/${incidentID}`);
         var that = this;
         let volunteerRespondingID = '';
 
@@ -436,11 +459,11 @@ export default class RegularUser extends Component {
                     }
                     console.log("volunteer responding", volunteerRespondingID);
                     // that.setState({ volunteerRespondingID });
-                    that.volunteerCoordinates(volunteerRespondingID)
+                    that.volunteerCoordinates(volunteerRespondingID);
                 } else {
                     console.log("volunteer responding", volunteerRespondingID);
                     that.setState({ volunteerRespondingID });
-                    that.volunteerCoordinates(volunteerRespondingID)
+                    that.volunteerCoordinates(volunteerRespondingID);
                 }
 
             }
@@ -452,7 +475,7 @@ export default class RegularUser extends Component {
         this._isMounted = false;
         Geolocation.clearWatch(this.watchId);
         this.volunteerListen.off();
-        this.responderListen.off()
+        this.responderListen.off();
         this.regularUserListen.off();
         this.user2.off();
         this.userIncidentId.off();
@@ -503,7 +526,7 @@ export default class RegularUser extends Component {
             console.log(jsonResult);
         }
         catch (err) {
-            console.log(err)
+            console.log(err);
         }
 
     }
@@ -527,28 +550,28 @@ export default class RegularUser extends Component {
 
     imageBlob(uri, mime = 'application/octet-stream') {
         return new Promise((resolve, reject) => {
-            const uploadUri = Platform.OS === 'ios' ? uri.replace('file://', '') : uri
-            let uploadBlob = null
-            const imageRef = app.storage().ref('images').child(`/RegularUser/${this.state.userId}`)
+            const uploadUri = Platform.OS === 'ios' ? uri.replace('file://', '') : uri;
+            let uploadBlob = null;
+            const imageRef = app.storage().ref('images').child(`/RegularUser/${this.state.userId}`);
 
             fs.readFile(uploadUri, 'base64')
                 .then((data) => {
-                    return Blob.build(data, { type: `${mime};BASE64` })
+                    return Blob.build(data, { type: `${mime};BASE64` });
                 })
                 .then((blob) => {
-                    uploadBlob = blob
-                    return imageRef.put(blob, { contentType: mime })
+                    uploadBlob = blob;
+                    return imageRef.put(blob, { contentType: mime });
                 })
                 .then(() => {
-                    uploadBlob.close()
-                    return imageRef.getDownloadURL()
+                    uploadBlob.close();
+                    return imageRef.getDownloadURL();
                 })
                 .then((url) => {
-                    resolve(url)
-                    console.log(url)
+                    resolve(url);
+                    console.log(url);
                 })
                 .catch((error) => {
-                    reject(error)
+                    reject(error);
                 })
         })
     }
@@ -570,7 +593,7 @@ export default class RegularUser extends Component {
             isSettled: false,
             incidentPhoto: '',
             reportedBy: this.state.userId,
-            timeReceive: date1,
+            timeReceived: date1,
             timeResponded: '',
             image_uri: this.state.image_uri,
             responderResponding: '',
@@ -583,8 +606,8 @@ export default class RegularUser extends Component {
             isRequestingResponders: false,
             isRequestingVolunteers: false,
         }).then((snap) => {
-            const incidentUserKey = snap.key
-            this.setState({ incidentUserKey })
+            const incidentUserKey = snap.key;
+            this.setState({ incidentUserKey });
             console.log("INCIDENT USER KEY HEREEEEE: ", this.state.userId);
         })
         this.setState({
@@ -596,7 +619,7 @@ export default class RegularUser extends Component {
             incidentPhoto: '',
             image_uri: '',
             reportedBy: '',
-            timeReceive: '',
+            timeReceived: '',
             timeResponded: '',
             responderResponding: '',
             volunteerResponding: '',
@@ -647,7 +670,7 @@ export default class RegularUser extends Component {
 
         }).catch(function (error) {
             // An error happened.
-            console.log(error)
+            console.log(error);
         });
 
     }
@@ -663,17 +686,18 @@ export default class RegularUser extends Component {
         this.getRouteDirection(place_id, description);
     }
 
+   
+
 
     renderContent = () => {
-        const {isImageViewVisible} = this.state;
+        const { isImageViewVisible } = this.state;
         const images = [
-          {
-              source: {
-                  uri:this.state.image_uri
-                  },
-          },
+            {
+                source: {
+                    uri: this.state.image_uri
+                },
+            },
         ];
-             
         return (
             <View style={styles.main}>
                 <View>
@@ -694,28 +718,24 @@ export default class RegularUser extends Component {
                     }}>
                         {this.state.incidentLocation}
                     </Text>
-                    <TouchableOpacity
-                            onPress={() => {
-                                this.setState({
-                                    isImageViewVisible: true,
-                                });
-                            }}
-                            disabled={!this.state.image_uri}
+                    {this.state.image_uri?    
+                <View style={styles.buttonContainer}><AwesomeButton height={50} width={190} backgroundColor="#467541" onPress={() => {
+                        this.setState({
+                            isImageViewVisible: true,
+                        });
+                    }}>Check Photo </AwesomeButton></View>           
+                    :null }
 
-                        >
-                    <Image source={{uri:this.state.image_uri}} style={{width:100, height:100,
-                        marginBottom: 15, left: 100}}></Image>
-                    </TouchableOpacity>
-                <ImageView
-                    glideAlways
-                    images={images}
-                    animationType="fade"
-                    isVisible={isImageViewVisible}
-                    renderFooter={this.renderFooter}
-                    onClose={() => this.setState({isImageViewVisible: false})}
-                />
-                    
-                    </View>
+                  
+<ImageView
+            glideAlways
+            images={images}
+            animationType="fade"
+            isVisible={isImageViewVisible}
+            renderFooter={this.renderFooter}
+            onClose={() => this.setState({ isImageViewVisible: false })}
+        />
+                </View>
             </View>
         )
     }
@@ -794,7 +814,7 @@ export default class RegularUser extends Component {
                         source={require("../images/userPosition.png")}
                         style={{ height: 45, width: 45 }} />
                 </Marker>
-            )
+            );
         }
         var markerResponder = null;
         if (this.state.responderLat) {
@@ -1004,7 +1024,7 @@ export default class RegularUser extends Component {
             </Text>
                     </Button>
 
-                        
+
                     <Button
                         style={{ fontSize: 18, color: 'white' }}
                         onPress={this.submitIncidentHandler}
@@ -1054,6 +1074,17 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'center',
         backgroundColor: '#6565fc'
+    },
+    buttonContainer: {
+        flex: 1,
+    },
+    responderButtons: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        padding: 10,
+        alignItems: 'center',
+        marginBottom: 15
     },
     container: {
         ...StyleSheet.absoluteFillObject,

@@ -44,6 +44,7 @@ export default class Responder extends Component {
 
         this.state = {
             isModalVisible: false,
+            isFeedbackVisible:false,
             isAccepted: false,
             isIncidentReady: false,
             destinationPlaceId: '',
@@ -65,9 +66,10 @@ export default class Responder extends Component {
             unresponded: true,
             isResponding: false,
             isSettled: false,
+            modalVisible:null,
             incidentPhoto: '',
             reportedBy: '',
-            timeReceive: '',
+            timeReceived: '',
             timeResponded: '',
             responderResponding: '',
             volunteerResponding: '',
@@ -218,7 +220,7 @@ export default class Responder extends Component {
             unrespondedResponder: false,
             responderResponding: this.state.userId,
             image_uri:this.state.image_uri,
-            timeReceive: date,
+            timeReceived: date,
         });
 
         app.database().ref(`mobileUsers/Responder/${userId}`).update({
@@ -332,7 +334,7 @@ export default class Responder extends Component {
 
         app.database().ref(`incidents/${incidentId}/requestResponders/${userId}`).update({
             timeArrived: '',
-            timeReceive: date,
+            timeReceived: date,
         });
 
         app.database().ref(`mobileUsers/Responder/${userId}`).update({
@@ -374,7 +376,7 @@ export default class Responder extends Component {
 
         app.database().ref(`incidents/${incidentID}/additionalDispatched/${userId}`).update({
             timeArrived: '',
-            timeReceive: date,
+            timeReceived: date,
         });
 
         app.database().ref(`mobileUsers/Responder/${userId}`).update({
@@ -384,6 +386,13 @@ export default class Responder extends Component {
         this.getRouteDirection(destinationPlaceId, incidentLocation);
 
     }
+    setModalVisible(visible) {
+        this.setState({modalVisible: visible});
+      }
+
+   
+
+    
 
     incidentListener = (userId) => {
         // this._isMounted = true;
@@ -456,20 +465,9 @@ export default class Responder extends Component {
                         that.setState({ incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId, image_uri });
                     }
                     else if (incidentID !== "" && responderResponding === userId && isSettled === true) {
-                        console.log("ARGUMENT 4");
-                        console.log("same additional responder has acceted")
-                        that.setState({ isIncidentReady: false, isSettled: true, incidentId: incidentID });
-                        Alert.alert(
-                            "INCIDENT HAS BEEN SETTLED",
-                            `Incident Type: ${incidentType}
-                                                 Incident Location: ${incidentLocation}
-                                                                         `
-                            ,
-                            [
-                                { text: "Ok", onPress: () => { that.clearSettled() } },
-                            ],
-                            { cancelable: false }
-                        );
+                        Alert.alert('fasd')
+                        this._toggleModal2()
+                     
 
                     }
                     else if (incidentID !== "" && responderResponding !== userId && isRequestingResponders === true && this.state.requestResponders === true && isSettled === false) {
@@ -512,21 +510,21 @@ export default class Responder extends Component {
                         this.getRouteDirection(destinationPlaceId, incidentLocation);
                     }
 
-                    else if (incidentID !== "" && isSettled === true) {
-                        console.log("ARGUMENT 8");
-                        that.setState({ isSettled: true, isIncidentReady: false, incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId , image_uri});
-                        Alert.alert(
-                            "INCIDENT HAS BEEN SETTLED",
-                            `Incident Type: ${incidentType}
-                                                 Incident Location: ${incidentLocation}
-                                                                         `
-                            ,
-                            [
-                                { text: "Ok", onPress: () => { that.clearSettled() } },
-                            ],
-                            { cancelable: false }
-                        );
-                    }
+                    // else if (incidentID !== "" && isSettled === true) {
+                    //     Alert.alert("ARGUMENT 8");
+                    //     that.setState({ isSettled: true, isIncidentReady: false, incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId , image_uri});
+                    //     Alert.alert(
+                    //         "INCIDENT HAS BEEN SETTLED111",
+                    //         `Incident Type: ${incidentType}
+                    //                              Incident Location: ${incidentLocation}
+                    //                                                      `
+                    //         ,
+                    //         [
+                    //             { text: "Ok", onPress: () => { that.clearSettled() } },
+                    //         ],
+                    //         { cancelable: false }
+                    //     );
+                    // }
                     else {
                         console.log("system is FLAWED")
                     }
@@ -630,7 +628,7 @@ export default class Responder extends Component {
             incidentPhoto: '',
             image_uri:this.state.image_uri,
             reportedBy: this.state.userId,
-            timeReceive: date,
+            timeReceived: date,
             timeResponderResponded: '',
             responderResponding: this.state.userId,
             volunteerResponding: '',
@@ -655,7 +653,7 @@ export default class Responder extends Component {
             incidentPhoto: '',
             reportedBy: '',
             image_uri:'',
-            timeReceive: '',
+            timeReceived: '',
             timeResponded: '',
             responderResponding: '',
             volunteerResponding: '',
@@ -733,6 +731,9 @@ export default class Responder extends Component {
     _toggleModal = () => {
         this.setState({ isModalVisible: !this.state.isModalVisible });
     }
+    _toggleModal2 = () => {
+        this.setState({ isFeedbackVisible: !this.state.isFeedbackVisible });
+    }
 
     _openDrawer = () => {
         this.refs.DRAWER.open();
@@ -788,19 +789,7 @@ export default class Responder extends Component {
                     }}>
                         {this.state.incidentLocation}
                     </Text>
-                    <TouchableOpacity
-                    style={{width:100, height:100,
-                       }}
-                            onPress={() => {
-                                this.setState({
-                                    isImageViewVisible: true,
-                                });
-                            }}
-                            disabled={!this.state.image_uri}
-                        >
-                    <Image source={{uri:this.state.image_uri}} style={{width:100, height:100,
-                        marginBottom: 15, left: 100}}></Image>
-                    </TouchableOpacity>
+                  
                     <ImageView
                     glideAlways
                     style={{flex:1,width:undefined,height:undefined}}
@@ -822,6 +811,13 @@ export default class Responder extends Component {
                             <View style={styles.buttonContainer}><AwesomeButton height={50} width={190} backgroundColor="#467541" onPress={this.arrivedLocationDispatched}>I have arrived! Dispatched. </AwesomeButton></View>
                     }
                     <View style={styles.buttonContainer}><AwesomeButton height={50} width={190} backgroundColor="#2c6c7c" onPress={this.isSettled}>Incident is settled!</AwesomeButton></View>
+                    {this.state.image_uri?  
+                    <View style={styles.buttonContainer}><AwesomeButton height={50} width={190} backgroundColor="#467541" onPress={() => {
+                        this.setState({
+                            isImageViewVisible: true,
+                        });
+                    }}>Check Photo </AwesomeButton></View>           
+                    :null }
                 </View>
             </View>
         )
@@ -989,7 +985,55 @@ export default class Responder extends Component {
                         icon={<Image source={require("../images/sendreport.png")} />}
                     />
                 }
-
+  <Modal isVisible={this.state.isFeedbackVisible}
+                        style={{
+                            justifyContent: 'center',
+                            borderRadius: 20,
+                            shadowRadius: 10,
+                            width: screen.width - 50,
+                            backgroundColor: 'white',
+    
+                        }}
+                    >
+                        <Text style={{
+                            fontSize: 20,
+                            fontWeight: 'bold',
+                            textAlign: 'center',
+                            marginTop: 20,
+                            marginBottom: 15
+                        }}>Input Incident Feedback
+                        </Text>
+                        <TextInput
+                            placeholder="Input Incident Feedback"
+                            style={styles.feedbackInput}
+                            onChangeText={incidentFeedback => {
+                                this.setState({ incidentFeedback });
+                           
+                            }}
+                            value={this.state.incidentFeedback}
+    
+                        />
+                    
+              
+                        <Button
+                            style={{ fontSize: 18, color: 'white' }}
+                            onPress={this.submitIncidentHandler}
+                            containerStyle={{
+                                padding: 8,
+                                marginLeft: 70,
+                                marginRight: 70,
+                                height: 40,
+                                borderRadius: 6,
+                                backgroundColor: 'mediumseagreen',
+                                marginTop: 20,
+    
+                            }}
+                        >
+    
+                            <Text style={{ justifyContent: 'center', color: 'white' }} >Submit Incident</Text>
+                        </Button>
+                     
+                    </Modal>
                 <Modal isVisible={this.state.isModalVisible}
                     style={{
                         justifyContent: 'center',
@@ -1082,6 +1126,7 @@ export default class Responder extends Component {
                     onClose={() => this.setState({isImageViewVisible: false})}
                       />
                 </Modal>
+              
             </View>
         );
     }
@@ -1184,6 +1229,16 @@ const styles = StyleSheet.create({
         borderWidth: 0.5,
         borderColor: "grey",
         height: 40,
+        marginTop: 10,
+        marginLeft: 20,
+        marginRight: 20,
+        padding: 5,
+        backgroundColor: "white"
+    },
+    feedbackInput:{
+        borderWidth: 0.5,
+        borderColor: "grey",
+        height: 100,
         marginTop: 10,
         marginLeft: 20,
         marginRight: 20,
