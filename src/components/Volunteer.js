@@ -9,7 +9,7 @@ import Drawer from 'react-native-circle-drawer';
 import BottomDrawer from 'rn-bottom-drawer';
 import RadioGroup from 'react-native-radio-buttons-group';
 import Icon from 'react-native-vector-icons/FontAwesome';
-
+import MapViewDirections from 'react-native-maps-directions';
 import 'babel-polyfill';
 import 'es6-symbol';
 
@@ -89,7 +89,7 @@ export default class Volunteer extends Component {
             if (user) {
 
                 this.setState({ user, userId: user.uid });
-                var userId = this.state.userId
+                var userId = this.state.userId;
                 this.getUserInfo();
                 this.incidentListener(userId);
 
@@ -261,11 +261,12 @@ export default class Volunteer extends Component {
             dispatchedVolunteer: false,
         });
         // this.setState({ isSettled: true })
-        var volunteerListen = app.database().ref(`mobileUsers/Volunteer/${userId}`)
+        var volunteerListen = app.database().ref(`mobileUsers/Volunteer/${userId}`);
+
         volunteerListen.update({
             incidentID: '',
             isAccepted: false,
-        })
+        });
 
         // app.database().ref(`incidents/${incidentID}`).update({
         //     isSettled: true,
@@ -291,11 +292,11 @@ export default class Volunteer extends Component {
         let userId = this.state.userId;
 
 
-        var volunteerListen = app.database().ref(`mobileUsers/Volunteer/${userId}`)
+        var volunteerListen = app.database().ref(`mobileUsers/Volunteer/${userId}`);
         volunteerListen.update({
             incidentID: "",
             isRejected: false,
-        })
+        });
     }
 
 
@@ -308,7 +309,7 @@ export default class Volunteer extends Component {
             // isRequestingResponders: true,
             isIncidentReady: true,
             requestVolunteers: true,
-        })
+        });
 
         app.database().ref(`incidents/${incidentId}/requestVolunteers/${userId}`).update({
 
@@ -335,7 +336,7 @@ export default class Volunteer extends Component {
     incidentListener = (userId) => {
         // this._isMounted = true;
         console.log("INCIDNE LISTENER", userId);
-        this.volunteerListen = app.database().ref(`mobileUsers/Volunteer/${userId}`)
+        this.volunteerListen = app.database().ref(`mobileUsers/Volunteer/${userId}`);
         var that = this;
         var incidentDetails = '';
 
@@ -355,6 +356,8 @@ export default class Volunteer extends Component {
                     incidentDetails = snapshot.val() || null;
                     var incidentType = incidentDetails.incidentType;
                     var incidentLocation = incidentDetails.incidentLocation;
+                    var markerLat = incidentDetails.coordinates.lat;
+                    var markerLng = incidentDetails.coordinates.lng;
                     var destinationPlaceId = incidentDetails.destinationPlaceId;
                     var image_uri = incidentDetails.image_uri;
                     var volunteerResponding = incidentDetails.volunteerResponding;
@@ -369,7 +372,7 @@ export default class Volunteer extends Component {
                                                                          `
                             ,
                             [
-                                { text: "Respond", onPress: () => { that.changeIncidentState(incidentType, incidentLocation, incidentID, destinationPlaceId, userId, image_uri) } },
+                                { text: "Respond", onPress: () => { that.changeIncidentState(incidentType, incidentLocation, incidentID, destinationPlaceId, userId, image_uri,markerLat,markerLng) } },
                                 { text: "Decline", onPress: () => { this.isRejected() } },
                             ],
                             { cancelable: false }
@@ -380,7 +383,7 @@ export default class Volunteer extends Component {
                     else if (volunteerResponding === userId && isSettled === false) {
                         console.log("same volunteer");
 
-                        that.setState({ originalVolunteer: true, isIncidentReady: true, incidentType, incidentLocation, destinationPlaceId, userId, incidentId: incidentID, isSettled: false, image_uri });
+                        that.setState({ originalVolunteer: true, isIncidentReady: true, incidentType, incidentLocation, destinationPlaceId, userId, incidentId: incidentID, isSettled: false, image_uri,markerLat,markerLng });
                         that.getRouteDirection(destinationPlaceId, incidentLocation);
                     }
                     else if (volunteerResponding !== userId && isRequestingVolunteers === true && this.state.requestVolunteers === false) {
@@ -391,7 +394,7 @@ export default class Volunteer extends Component {
                                                                          `
                             ,
                             [
-                                { text: "Respond", onPress: () => { that.isRequestingVolunteers(incidentID, userId, destinationPlaceId, incidentLocation) } },
+                                { text: "Respond", onPress: () => { that.isRequestingVolunteers(incidentID, userId, destinationPlaceId, incidentLocation,markerLat,markerLng) } },
                                 { text: "Decline", onPress: () => { this.isRejected() } },
                             ],
                             { cancelable: false }
@@ -412,12 +415,12 @@ export default class Volunteer extends Component {
                             ],
                             { cancelable: false }
                         );
-                        that.setState({ isIncidentReady: false, isSettled: true, incidentType, incidentLocation, destinationPlaceId, userId, incidentId: incidentID, image_uri });
+                        that.setState({ isIncidentReady: false, isSettled: true, incidentType, incidentLocation, destinationPlaceId, userId, incidentId: incidentID, image_uri,markerLat,markerLng });
 
                     }
                     else if (volunteerResponding !== userId && isRequestingVolunteers === true && this.state.requestVolunteers === true && isSettled === false) {
                         console.log("requested volunteer condition. settled: false");
-                        that.setState({ incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId, image_uri });
+                        that.setState({ incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId, image_uri,markerLat,markerLng});
                         that.getRouteDirection(destinationPlaceId, incidentLocation);
                     }
                     else if (volunteerResponding !== userId && isRequestingVolunteers === true && this.state.requestVolunteers === true && isSettled === true) {
@@ -446,11 +449,11 @@ export default class Volunteer extends Component {
                                                                                                  `
                                 ,
                                 [
-                                    { text: "Respond", onPress: () => { that.additionalDispatchedVolunteer(incidentID, userId, destinationPlaceId, incidentLocation) } },
+                                    { text: "Respond", onPress: () => { that.additionalDispatchedVolunteer(incidentID, userId, destinationPlaceId, incidentLocation,image_uri,markerLat,markerLng) } },
                                 ],
                                 { cancelable: false }
                             );
-                            that.setState({ incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId });
+                            that.setState({ incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId,image_uri,markerLat,markerLng });
                         }
                         this.getRouteDirection(destinationPlaceId, incidentLocation);
                     }
@@ -754,23 +757,40 @@ export default class Volunteer extends Component {
 
         let marker = null;
 
-        if (this.state.pointCoords.length > 1) {
-            marker = (
-                <Marker
-                    coordinate={this.state.pointCoords[this.state.pointCoords.length - 1]}
-                />
-            );
-        }
+        if (this.state.markerLat) {
+            const { pointCoords } = this.state;
+   
+               marker = (
+                   
+                   <Marker
+                       coordinate={
+                           {
+                               latitude: this.state.markerLat,
+                               longitude: this.state.markerLng
+                           }
+                       }
+                       title={`${this.state.incidentType}`}
+                       description={this.state.incidentLocation}
+                   >
+                       <Image
+                           source={require("../images/alert.png")}
+                           style={{ height: 45, width: 45 }} />
+                   </Marker>
+   
+               )
+           }
 
 
         let polylinemarker = null;
 
         polylinemarker = (
-            <Polyline
-                coordinates={this.state.pointCoords}
-                strokeWidth={4}
-                strokeColor="red"
-            />
+            <MapViewDirections
+    origin={{latitude: this.state.latitude, longitude: this.state.longitude}}
+    destination={{latitude: this.state.markerLat, longitude: this.state.markerLng}}
+    apikey={apiKey}
+    strokeWidth={3}
+    strokeColor="hotpink"
+  />
         )
 
 

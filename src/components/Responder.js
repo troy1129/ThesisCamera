@@ -17,6 +17,7 @@ var ImagePicker = require('react-native-image-picker');
 import 'babel-polyfill';
 import 'es6-symbol';
 import RNFetchBlob from 'react-native-fetch-blob';
+import MapViewDirections from 'react-native-maps-directions';
 import app from '../config/fire';
 import apiKey from '../config/apiKey';
 import _ from 'lodash';
@@ -27,6 +28,7 @@ import PolyLine from '@mapbox/polyline';
 var screen = Dimensions.get('window');
 const TAB_BAR_HEIGHT = 100;
 var profileName = 'LOL';
+const SPACE = 0.001
 
 var options = {
 };
@@ -47,6 +49,8 @@ export default class Responder extends Component {
             isFeedbackVisible:false,
             isAccepted: false,
             isIncidentReady: false,
+            pinFinal:false,
+            pinUpdate:false,
             destinationPlaceId: '',
             isRequestingResponders: '',
             dispatchedResponder: false,
@@ -55,6 +59,8 @@ export default class Responder extends Component {
             originalResponder: false,
             userKey: "",
             userType: '',
+            markerLat:null,
+            markerLng:null,
             image_uri:'',
             isImageViewVisible: false,
             incidentType: "Vehicular Accident",
@@ -390,7 +396,17 @@ export default class Responder extends Component {
         this.setState({modalVisible: visible});
       }
 
-   
+      usePinLocation = () => 
+      {
+          Alert.alert("Long Press Marker and Move to Desired Location!")
+          this.setState({incidentLocation:'Pinned Location',
+          pinUpdate:true,
+          destinationPlaceId:'Pinned Location',
+          isModalVisible: !this.state.isModalVisible,
+          markerLat: this.state.latitude+SPACE,
+          markerLng:this.state.longitude+SPACE,
+      })
+      }
 
     
 
@@ -420,6 +436,8 @@ export default class Responder extends Component {
                     var incidentType = incidentDetails.incidentType;
                     var incidentLocation = incidentDetails.incidentLocation;
                     var image_uri = incidentDetails.image_uri;
+                    var markerLat = incidentDetails.coordinates.lat;
+                    var markerLng = incidentDetails.coordinates.lng;
                     var destinationPlaceId = incidentDetails.destinationPlaceId;
                     var responderResponding = incidentDetails.responderResponding;
                     var isSettled = incidentDetails.isSettled;
@@ -435,17 +453,17 @@ export default class Responder extends Component {
                                                                          `
                             ,
                             [
-                                { text: "Respond", onPress: () => { that.changeIncidentState(incidentType, incidentLocation, incidentID, destinationPlaceId, userId, image_uri) } },
+                                { text: "Respond", onPress: () => { that.changeIncidentState(incidentType, incidentLocation, incidentID, destinationPlaceId, userId, image_uri,markerLat,markerLng) } },
                             ],
                             { cancelable: false }
                         );
-                        that.setState({ originalResponder: true, isIncidentReady: true, incidentType, incidentLocation, destinationPlaceId, userId, incidentId: incidentID, image_uri });
+                        that.setState({ originalResponder: true, isIncidentReady: true, incidentType, incidentLocation, destinationPlaceId, userId, incidentId: incidentID, image_uri,markerLat,markerLng });
                     }
                     else if (incidentID !== "" && responderResponding === userId && isSettled === false) {
                         console.log("ARGUMENT 2");
                         console.log("same responder");
 
-                        that.setState({ originalResponder: true, isIncidentReady: true, incidentType, incidentLocation, destinationPlaceId, userId, incidentId: incidentID, isSettled: false, image_uri });
+                        that.setState({ originalResponder: true, isIncidentReady: true, incidentType, incidentLocation, destinationPlaceId, userId, incidentId: incidentID, isSettled: false, image_uri ,markerLat,markerLng});
                         that.getRouteDirection(destinationPlaceId, incidentLocation);
                     }
                     else if (incidentID !== "" && responderResponding !== userId && isRequestingResponders === true && this.state.requestResponders === false && isSettled === false) {
@@ -458,22 +476,31 @@ export default class Responder extends Component {
                                                                          `
                             ,
                             [
-                                { text: "Respond", onPress: () => { that.isRequestingResponders(incidentID, userId, destinationPlaceId, incidentLocation, image_uri) } },
+                                { text: "Respond", onPress: () => { that.isRequestingResponders(incidentID, userId, destinationPlaceId, incidentLocation, image_uri,markerLat,markerLng) } },
                             ],
                             { cancelable: false }
                         );
-                        that.setState({ incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId, image_uri });
+                        that.setState({ incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId, image_uri,markerLat,markerLng });
                     }
                     else if (incidentID !== "" && responderResponding === userId && isSettled === true) {
-                        Alert.alert('fasd')
-                        this._toggleModal2()
-                     
-
+                        console.log("ARGUMENT 6");
+                        that.setState({ isSettled: true, isIncidentReady: false, incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId });
+                        Alert.alert(
+                            "INCIDENT HAS BEEN SETTLED43",
+                            `Incident Type: ${incidentType}
+                                                 Incident Location: ${incidentLocation}
+                                                                         `
+                            ,
+                            [
+                                { text: "Ok", onPress: () => { console.log('ok')}},
+                            ],
+                            { cancelable: false }
+                        );
                     }
                     else if (incidentID !== "" && responderResponding !== userId && isRequestingResponders === true && this.state.requestResponders === true && isSettled === false) {
                         //condition requested responders
                         console.log("ARGUMENT 5");
-                        that.setState({ isSettled: false, isIncidentReady: true, incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId , image_uri});
+                        that.setState({ isSettled: false, isIncidentReady: true, incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId , image_uri,markerLat,markerLng});
                         that.getRouteDirection(destinationPlaceId, incidentLocation);
                     }
                     else if (incidentID !== "" && responderResponding !== userId && isRequestingResponders === true && this.state.requestResponders === true && isSettled === true) {
@@ -501,11 +528,11 @@ export default class Responder extends Component {
                                                                          `
                                 ,
                                 [
-                                    { text: "Respond", onPress: () => { that.additionalDispatchedResponders(incidentID, userId, destinationPlaceId, incidentLocation, image_uri) } },
+                                    { text: "Respond", onPress: () => { that.additionalDispatchedResponders(incidentID, userId, destinationPlaceId, incidentLocation, image_uri,markerLat,markerLng) } },
                                 ],
                                 { cancelable: false }
                             );
-                            that.setState({ incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId, image_uri });
+                            that.setState({ incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId, image_uri,markerLat,markerLng });
                         }
                         this.getRouteDirection(destinationPlaceId, incidentLocation);
                     }
@@ -624,6 +651,8 @@ export default class Responder extends Component {
             incidentLocation: this.state.incidentLocation,
             unresponded: true,
             isResponding: false,
+            markerLat:this.state.markerLat,
+            markerLng:this.state.markerLng,
             isSettled: false,
             incidentPhoto: '',
             image_uri:this.state.image_uri,
@@ -862,30 +891,72 @@ export default class Responder extends Component {
 
         let marker = null;
 
-        if (this.state.pointCoords.length > 1) {
+        if (this.state.markerLat && this.state.pinFinal===false) {
+            const { pointCoords } = this.state;
+   
+               marker = (
+                   
+                   <Marker
+                   draggable
+                   onDragEnd={
+                       (e)=>{this.setState({
+                           markerLat:e.nativeEvent.coordinate.latitude,
+                           markerLng:e.nativeEvent.coordinate.longitude,
+                           pointCoords:pointCoords.concat([e.nativeEvent.coordinate]),
+                           isModalVisible: !this.state.isModalVisible
+                       })}
+                   }
+                       coordinate={
+                           {
+                               latitude: this.state.markerLat,
+                               longitude: this.state.markerLng
+                           }
+                       }
+                       title={`${this.state.incidentType}`}
+                       description={this.state.incidentLocation}
+                   >
+                       <Image
+                           source={require("../images/alert.png")}
+                           style={{ height: 45, width: 45 }} />
+                   </Marker>
+   
+               )
+           }
+           else if (this.state.markerLat && this.state.pinFinal===true){
             marker = (
+                
                 <Marker
-                    coordinate={this.state.pointCoords[this.state.pointCoords.length - 1]}
+                    coordinate={
+                        {
+                            latitude: this.state.markerLat,
+                            longitude: this.state.markerLng
+                        }
+                    }
                     title={`${this.state.incidentType}`}
                     description={this.state.incidentLocation}
-
                 >
                     <Image
                         source={require("../images/alert.png")}
                         style={{ height: 45, width: 45 }} />
                 </Marker>
-            );
+
+            )
+
         }
+
 
         let polylinemarker = null;
 
         polylinemarker = (
-            <Polyline
-                coordinates={this.state.pointCoords}
-                strokeWidth={4}
-                strokeColor="red"
-            />
+            <MapViewDirections
+            origin={{latitude: this.state.latitude, longitude: this.state.longitude}}
+            destination={{latitude: this.state.markerLat, longitude: this.state.markerLng}}
+            apikey={apiKey}
+            strokeWidth={3}
+            strokeColor="hotpink"
+          />
         )
+        
 
         if (this.state.latitude) {
             getUserLocation = (
@@ -955,6 +1026,9 @@ export default class Responder extends Component {
 
                 >
                     {getUserLocation}
+                    {this.state.isSettled === true ? null : marker}
+                    {this.state.isSettled === true ? null : polylinemarker}
+
                     {this.state.isIncidentReady === true ? polylinemarker : null}
                     {this.state.isIncidentReady === true ? marker : null}
                 </MapView>
@@ -1059,16 +1133,19 @@ export default class Responder extends Component {
                     }}>INPUT INCIDENT
                     </Text>
                     <RadioGroup radioButtons={this.state.data} onPress={this.onPress} />
-                    <TextInput
-                        placeholder="Enter location.."
-                        style={styles.destinationInput}
-                        onChangeText={incidentLocation => {
-                            this.setState({ incidentLocation });
-                            this.onChangeDestinationDebounced(incidentLocation);
-                        }}
-                        value={this.state.incidentLocation}
+                    {this.state.pinUpdate===true ? null :
 
-                    />
+<TextInput
+    placeholder="Enter location.."
+    style={styles.destinationInput}
+    onChangeText={incidentLocation => {
+        this.setState({ incidentLocation });
+        this.onChangeDestinationDebounced(incidentLocation);
+    }}
+    value={this.state.incidentLocation}
+
+/>
+}
                     {locationPredictions}
                     <TouchableOpacity
                             onPress={() => {
@@ -1116,6 +1193,21 @@ export default class Responder extends Component {
 
                         <Text style={{ justifyContent: 'center', color: 'white' }} >Submit Incident</Text>
                     </Button>
+                    {this.state.destinationPlaceId ? null:       <Button
+                        style={{ fontSize: 18, color: 'white' }}
+                        onPress={this.usePinLocation}
+                        containerStyle={{
+                            padding: 8,
+                            marginLeft: 70,
+                            marginRight: 70,
+                            height: 40,
+                            borderRadius: 6,
+                            backgroundColor: 'mediumseagreen',
+                            marginTop: 20,
+                        }}
+                    >
+                        <Text style={{ justifyContent: 'center', color: 'white' }} >Use Pin Location</Text>
+                    </Button>}
                     <ImageView
                     glideAlways
                     style={{flex:1,width:undefined,height:undefined}}

@@ -19,6 +19,8 @@ import PolyLine from '@mapbox/polyline';
 import ImageView from 'react-native-image-view';
 import Geolocation from 'react-native-geolocation-service';
 import Routes from '../Routes';
+import MapViewDirections from 'react-native-maps-directions';
+
 
 var options = {
 };
@@ -29,6 +31,7 @@ window.Blob = Blob;
 
 var screen = Dimensions.get('window');
 
+const SPACE = 0.001
 
 export default class RegularUser extends Component {
     _isMounted = false;
@@ -50,6 +53,7 @@ export default class RegularUser extends Component {
             isIncidentReady: false,
             markerLng: null,
             unresponded: true,
+            pinFinal:false,
             isResponding: false,
             isSettled: false,
             incidentID: '',
@@ -546,6 +550,15 @@ export default class RegularUser extends Component {
 
     }
 
+    updateEndLocation = () =>
+    {
+        setIncidentID = () => {
+            app.database().ref(`mobileUsers/Regular User/${this.state.userId}`).update({
+                incidentID: this.state.incidentUserKey,
+            });
+    
+        }
+    }
 
 
     imageBlob(uri, mime = 'application/octet-stream') {
@@ -580,7 +593,8 @@ export default class RegularUser extends Component {
     submitIncidentHandler = () => {
         var date = Date(Date.now());
         date1 = date.toString();
-
+        this.setState({pinFinal:true,isModalVisible: !this.state.isModalVisible,
+        })
         var coords = this.state.pointCoords;
         var coords2 = this.state.pointCoords[coords.length - 1];
         var coordLat = coords2.latitude;
@@ -592,6 +606,8 @@ export default class RegularUser extends Component {
             isResponding: false,
             isSettled: false,
             incidentPhoto: '',
+            markerLat:this.state.markerLat,
+            markerLng:this.state.markerLng,
             reportedBy: this.state.userId,
             timeReceived: date1,
             timeResponded: '',
@@ -686,6 +702,7 @@ export default class RegularUser extends Component {
         this.getRouteDirection(place_id, description);
     }
 
+    
    
 
 
@@ -759,6 +776,18 @@ export default class RegularUser extends Component {
         )
     }
 
+    usePinLocation = () => 
+    {
+        Alert.alert("Long Press Marker and Move to Desired Location!")
+        this.setState({incidentLocation:'Pinned Location',
+        pinUpdate:true,
+        destinationPlaceId:'Pinned Location',
+        isModalVisible: !this.state.isModalVisible,
+        markerLat: this.state.latitude+SPACE,
+        markerLng:this.state.longitude+SPACE,
+    })
+    }
+
     renderTopRightView() {
         return (
             <View style={{ top: 10, left: 75 }}>
@@ -778,8 +807,41 @@ export default class RegularUser extends Component {
         ];
         console.log("marekr coords", this.state.markerLat, this.state.markerLng, this.state.isSettled);
         let marker = null;
-        if (this.state.markerLat) {
+        if (this.state.markerLat && this.state.pinFinal===false) {
+         const { pointCoords } = this.state;
+
             marker = (
+                
+                <Marker
+                draggable
+                onDragEnd={
+                    (e)=>{this.setState({
+                        markerLat:e.nativeEvent.coordinate.latitude,
+                        markerLng:e.nativeEvent.coordinate.longitude,
+                        pointCoords:pointCoords.concat([e.nativeEvent.coordinate]),
+                        isModalVisible: !this.state.isModalVisible
+                    })}
+                }
+                    coordinate={
+                        {
+                            latitude: this.state.markerLat,
+                            longitude: this.state.markerLng
+                        }
+                    }
+                    title={`${this.state.incidentType}`}
+                    description={this.state.incidentLocation}
+                >
+                    <Image
+                        source={require("../images/alert.png")}
+                        style={{ height: 45, width: 45 }} />
+                </Marker>
+
+            )
+        }
+
+        else if (this.state.markerLat && this.state.pinFinal===true){
+            marker = (
+                
                 <Marker
                     coordinate={
                         {
@@ -796,6 +858,7 @@ export default class RegularUser extends Component {
                 </Marker>
 
             )
+
         }
 
         if (this.state.latitude) {
@@ -908,11 +971,14 @@ export default class RegularUser extends Component {
                         strokeWidth={4}
                         strokeColor="red"
                     /> */}
-                    {this.state.isSettled === true ? null : <Polyline
-                        coordinates={this.state.pointCoords}
-                        strokeWidth={4}
-                        strokeColor="red"
-                    />}
+                    {this.state.isSettled === true ? null :  <MapViewDirections
+    origin={{latitude: this.state.latitude, longitude: this.state.longitude}}
+    destination={{latitude: this.state.markerLat, longitude: this.state.markerLng}}
+    apikey={apiKey}
+    strokeWidth={3}
+    strokeColor="hotpink"
+  />
+  }
                     {this.state.isSettled === true ? null : marker}
                     {this.state.isSettled === true ? null : markerResponder}
                     {this.state.isSettled === true ? null : markerVolunteer}
@@ -994,6 +1060,9 @@ export default class RegularUser extends Component {
                         }}></Image>
                     </TouchableOpacity>
                     <RadioGroup radioButtons={this.state.data} onPress={this.onPress} />
+
+                    {this.state.pinUpdate===true ? null :
+
                     <TextInput
                         placeholder="Enter location.."
                         style={styles.destinationInput}
@@ -1004,7 +1073,9 @@ export default class RegularUser extends Component {
                         value={this.state.incidentLocation}
 
                     />
+                    }
                     {locationPredictions}
+                    
                     <Button
                         style={{ fontSize: 18, color: "white" }}
                         onPress={this.getImage}
@@ -1024,7 +1095,7 @@ export default class RegularUser extends Component {
             </Text>
                     </Button>
 
-
+                        
                     <Button
                         style={{ fontSize: 18, color: 'white' }}
                         onPress={this.submitIncidentHandler}
@@ -1041,6 +1112,22 @@ export default class RegularUser extends Component {
                     >
                         <Text style={{ justifyContent: 'center', color: 'white' }} >Submit Incident</Text>
                     </Button>
+
+                    {this.state.destinationPlaceId ? null:       <Button
+                        style={{ fontSize: 18, color: 'white' }}
+                        onPress={this.usePinLocation}
+                        containerStyle={{
+                            padding: 8,
+                            marginLeft: 70,
+                            marginRight: 70,
+                            height: 40,
+                            borderRadius: 6,
+                            backgroundColor: 'mediumseagreen',
+                            marginTop: 20,
+                        }}
+                    >
+                        <Text style={{ justifyContent: 'center', color: 'white' }} >Use Pin Location</Text>
+                    </Button>}
 
                     <ImageView
                         glideAlways
