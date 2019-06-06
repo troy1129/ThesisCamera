@@ -94,7 +94,7 @@
   <play-services-stats versions="15.0.0,15.0.1,16.0.1"/>
   <strict-version-matcher-plugin versions="1.0.0,1.0.1,1.0.2,1.0.3,1.1.0"/>
   <play-services-vision-image-label versions="15.0.0,16.2.0,17.0.2"/>
-  <oss-licenses-plugin versions="0.9.3,0.9.4"/>
+  <oss-licenses-plugin versions="0.9.3,0.9.4,0.9.5"/>
   <play-services-measurement-sdk-api versions="16.0.1,16.0.2,16.0.3,16.0.4,16.3.0,16.4.0,16.5.0"/>
   <play-services-measurement-api versions="16.0.1,16.0.2,16.0.3,16.0.4,16.3.0,16.4.0,16.5.0"/>
   <play-services-measurement-sdk versions="16.0.1,16.4.0,16.5.0"/>

@@ -33,6 +33,7 @@ export default class Volunteer extends Component {
             isModalVisible: false,
             dispatchedVolunteer: false,
             isAccepted: false,
+            additionalDetails:'',
             isIncidentReady: false,
             destinationPlaceId: '',
             isRequestingVolunteers: '',
@@ -40,6 +41,7 @@ export default class Volunteer extends Component {
             userId: '',
             originalVolunteer: false,
             image_uri: '',
+            originalVolunteerName:'',
             userKey: "",
             userType: '',
             incidentType: "",
@@ -157,13 +159,17 @@ export default class Volunteer extends Component {
             image_uri: this.state.image_uri,
             unrespondedVolunteer: false,
             volunteerResponding: this.state.userId,
-            timeReceiveVolunteer: date1
+            timeReceiveVolunteer: date1,
+            originalVolunteerName:this.state.firstName+' '+this.state.lastName
+
         });
 
         app.database().ref(`mobileUsers/Volunteer/${this.state.userId}`).update({
             isAccepted: true,
         })
         this.getRouteDirection(destinationPlaceId, incidentLocation);
+
+       
     }
 
     arrivedLocation = () => {
@@ -213,28 +219,7 @@ export default class Volunteer extends Component {
         });
     }
 
-    additionalDispatchedVolunteer = (incidentID, userId, destinationPlaceId, incidentLocation) => {
-        var time = Date(Date.now());
-        date = time.toString();
-
-
-        console.log("OTHER DISPATCHED", this.state.userId);
-        this.setState({
-            isIncidentReady: true,
-            dispatchedVolunteer: true,
-        })
-
-        app.database().ref(`incidents/${incidentID}/additionalDispatchedVolunteer/${userId}`).update({
-            timeArrived: '',
-            timeReceived: date,
-        });
-
-        app.database().ref(`mobileUsers/Volunteer/${userId}`).update({
-            isAccepted: true,
-        });
-
-        this.getRouteDirection(destinationPlaceId, incidentLocation);
-    }
+    
 
     arrivedLocationDispatched = () => {
         var time = Date(Date.now());
@@ -312,7 +297,7 @@ export default class Volunteer extends Component {
         });
 
         app.database().ref(`incidents/${incidentId}/requestVolunteers/${userId}`).update({
-
+            name:this.state.firstName+' '+this.state.lastName,
             timeArrived: '',
             timeReceived: date1,
         });
@@ -321,6 +306,8 @@ export default class Volunteer extends Component {
             isAccepted: true,
         });
         this.getRouteDirection(destinationPlaceId, incidentLocation);
+
+       
     }
 
 
@@ -351,13 +338,15 @@ export default class Volunteer extends Component {
 
             if (incidentID !== "") {
                 console.log("hey i got here");
-                this.userIncidentId = app.database().ref(`incidents/${incidentID}`)
+                this.userIncidentId = app.database().ref(`incidents/${incidentID}`);
                 this.userIncidentId.on('value', (snapshot) => {
                     incidentDetails = snapshot.val() || null;
+                    var originalVolunteerName=incidentDetails.originalVolunteerName;
                     var incidentType = incidentDetails.incidentType;
                     var incidentLocation = incidentDetails.incidentLocation;
                     var markerLat = incidentDetails.coordinates.lat;
                     var markerLng = incidentDetails.coordinates.lng;
+                    var additionalDetails=incidentDetails.additionalDetails;
                     var destinationPlaceId = incidentDetails.destinationPlaceId;
                     var image_uri = incidentDetails.image_uri;
                     var volunteerResponding = incidentDetails.volunteerResponding;
@@ -372,7 +361,7 @@ export default class Volunteer extends Component {
                                                                          `
                             ,
                             [
-                                { text: "Respond", onPress: () => { that.changeIncidentState(incidentType, incidentLocation, incidentID, destinationPlaceId, userId, image_uri,markerLat,markerLng) } },
+                                { text: "Respond", onPress: () => { that.changeIncidentState(incidentType, incidentLocation, incidentID, destinationPlaceId, userId, image_uri,markerLat,markerLng,additionalDetails,originalVolunteerName) } },
                                 { text: "Decline", onPress: () => { this.isRejected() } },
                             ],
                             { cancelable: false }
@@ -383,7 +372,7 @@ export default class Volunteer extends Component {
                     else if (volunteerResponding === userId && isSettled === false) {
                         console.log("same volunteer");
 
-                        that.setState({ originalVolunteer: true, isIncidentReady: true, incidentType, incidentLocation, destinationPlaceId, userId, incidentId: incidentID, isSettled: false, image_uri,markerLat,markerLng });
+                        that.setState({ originalVolunteer: true, isIncidentReady: true, incidentType, incidentLocation, destinationPlaceId, userId, incidentId: incidentID, isSettled: false, image_uri,markerLat,markerLng ,additionalDetails,originalVolunteerName});
                         that.getRouteDirection(destinationPlaceId, incidentLocation);
                     }
                     else if (volunteerResponding !== userId && isRequestingVolunteers === true && this.state.requestVolunteers === false) {
@@ -394,12 +383,12 @@ export default class Volunteer extends Component {
                                                                          `
                             ,
                             [
-                                { text: "Respond", onPress: () => { that.isRequestingVolunteers(incidentID, userId, destinationPlaceId, incidentLocation,markerLat,markerLng) } },
+                                { text: "Respond", onPress: () => { that.isRequestingVolunteers(incidentID, userId, destinationPlaceId, incidentLocation,markerLat,markerLng,additionalDetails) } },
                                 { text: "Decline", onPress: () => { this.isRejected() } },
                             ],
                             { cancelable: false }
                         );
-                        that.setState({ incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId, image_uri });
+                        that.setState({ incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId, image_uri,additionalDetails });
                     }
                     else if (isSettled === true) {
                         console.log("same additional volunteer has acceted")
@@ -415,12 +404,12 @@ export default class Volunteer extends Component {
                             ],
                             { cancelable: false }
                         );
-                        that.setState({ isIncidentReady: false, isSettled: true, incidentType, incidentLocation, destinationPlaceId, userId, incidentId: incidentID, image_uri,markerLat,markerLng });
+                        that.setState({ isIncidentReady: false, isSettled: true, incidentType, incidentLocation, destinationPlaceId, userId, incidentId: incidentID, image_uri,markerLat,markerLng,additionalDetails});
 
                     }
                     else if (volunteerResponding !== userId && isRequestingVolunteers === true && this.state.requestVolunteers === true && isSettled === false) {
                         console.log("requested volunteer condition. settled: false");
-                        that.setState({ incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId, image_uri,markerLat,markerLng});
+                        that.setState({ incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId, image_uri,markerLat,markerLng,additionalDetails});
                         that.getRouteDirection(destinationPlaceId, incidentLocation);
                     }
                     else if (volunteerResponding !== userId && isRequestingVolunteers === true && this.state.requestVolunteers === true && isSettled === true) {
@@ -436,7 +425,7 @@ export default class Volunteer extends Component {
                             ],
                             { cancelable: false }
                         );
-                        that.setState({ isIncidentReady: false, isSettled: true, incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId });
+                        that.setState({ isIncidentReady: false, isSettled: true, incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId,image_uri,additionalDetails});
 
                     }
                     else if (volunteerResponding !== userId && isRequestingVolunteers === false && this.state.requestVolunteers === false && isSettled === false) {
@@ -449,11 +438,11 @@ export default class Volunteer extends Component {
                                                                                                  `
                                 ,
                                 [
-                                    { text: "Respond", onPress: () => { that.additionalDispatchedVolunteer(incidentID, userId, destinationPlaceId, incidentLocation,image_uri,markerLat,markerLng) } },
+                                    { text: "Respond", onPress: () => { that.additionalDispatchedVolunteer(incidentID, userId, destinationPlaceId, incidentLocation,image_uri,markerLat,markerLng,additionalDetails) } },
                                 ],
                                 { cancelable: false }
                             );
-                            that.setState({ incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId,image_uri,markerLat,markerLng });
+                            that.setState({ incidentType, incidentLocation, destinationPlaceId, incidentId: incidentID, userId,image_uri,markerLat,markerLng,additionalDetails });
                         }
                         this.getRouteDirection(destinationPlaceId, incidentLocation);
                     }
@@ -544,81 +533,6 @@ export default class Volunteer extends Component {
         this.userIncidentId.off();
     }
 
-
-    submitIncidentHandler = () => {
-        var date = Date(Date.now());
-        date1 = date.toString();
-
-        var coords = this.state.pointCoords;
-        var coords2 = this.state.pointCoords[coords.length - 1];
-        var coordLat = coords2.latitude;
-        var coordLng = coords2.longitude;
-        app.database().ref("/incidents").push({
-            incidentType: this.state.incidentType,
-            incidentLocation: this.state.incidentLocation,
-            unresponded: true,
-            isResponding: false,
-            isSettled: false,
-            incidentPhoto: '',
-            reportedBy: this.state.userId,
-            timeReceived: date1,
-            timeResponded: '',
-            responderResponding: this.state.userId,
-            volunteerResponding: '',
-            coordinates: {
-                lat: coordLat,
-                lng: coordLng
-            },
-            destinationPlaceId: this.state.destinationPlaceId,
-            isRequestingResponders: false,
-            isRequestingVolunteers: false,
-        }).then((snap) => {
-            const incidentUserKey = snap.key
-            this.setState({ incidentUserKey })
-            console.log("INCIDENT USER KEY HEREEEEE: ", this.state.userId);
-        })
-        this.setState({
-            incidentType: '',
-            incidentLocation: '',
-            unresponded: null,
-            isResponding: null,
-            isSettled: null,
-            incidentPhoto: '',
-            reportedBy: '',
-            timeReceived: '',
-            timeResponded: '',
-            responderResponding: '',
-            volunteerResponding: '',
-            coordinates: {
-                lat: null,
-                lng: null
-            },
-            markerCoords: {
-                lat: null,
-                lng: null
-            },
-            destinationPlaceId: '',
-            isRequestingResponders: false,
-            isRequestingVolunteers: false,
-
-
-        });
-        console.log(this.state.incidentsList);
-        Alert.alert(
-            'Attention: ',
-            'Report has been sent',
-            [
-                {
-                    text: 'Cancel',
-                    onPress: () => console.log('Cancel Pressed'),
-                    style: 'cancel',
-                },
-                { text: 'OK', onPress: () => this.setIncidentID() },
-            ],
-            { cancelable: false },
-        );
-    }
-
     setIncidentID = () => {
         app.database().ref(`mobileUsers/Volunteer/${this.state.userId}`).update({
             incidentID: this.state.incidentUserKey,
@@ -698,9 +612,9 @@ export default class Volunteer extends Component {
                         <View style={styles.buttonContainer}><AwesomeButton height={50} width={190} backgroundColor="#467541" onPress={() => { this.arrivedLocationRequested() }}>I have arrived! </AwesomeButton></View>
                         :
                         this.state.dispatchedVolunteer === false ?
-                            <View style={styles.buttonContainer}><AwesomeButton height={50} width={190} backgroundColor="#467541" onPress={() => { this.arrivedLocation() }}>I have arrived! </AwesomeButton></View>
+                            <View style={styles.buttonContainer}><AwesomeButton height={50} width={190} backgroundColor="#467541" onPress={() => { this.arrivedLocation() }}>I have arrived2! </AwesomeButton></View>
                             :
-                            <View style={styles.buttonContainer}><AwesomeButton height={50} width={190} backgroundColor="#467541" onPress={this.arrivedLocationDispatched()}>I have arrived! </AwesomeButton></View>
+                            <View style={styles.buttonContainer}><AwesomeButton height={50} width={190} backgroundColor="#467541" onPress={this.arrivedLocationDispatched()}>I have arrived3! </AwesomeButton></View>
 
                     }
                      {this.state.image_uri?    
@@ -710,6 +624,10 @@ export default class Volunteer extends Component {
                         });
                     }}>Check Photo </AwesomeButton></View>           
                     :null }
+                    {this.state.additionalDetails?
+                     <View style={styles.buttonContainer}><AwesomeButton height={50} width={190} backgroundColor="#467541" onPress={() => {
+                        alert(JSON.stringify(this.state.additionalDetails))
+                    }}>Check Additional Details</AwesomeButton></View> :null    }
                     <ImageView
             glideAlways
             images={images}
@@ -736,7 +654,7 @@ export default class Volunteer extends Component {
                 <Text style={{ color: 'white', fontWeight: 'normal', fontSize: 15 }}>
                     You are a {this.state.userType}.
                  </Text>
-                <TouchableOpacity disabled={this.state.isIncidentReady} onPress={this.signOutUser}>
+                <TouchableOpacity /*disabled={this.state.isIncidentReady}*/ onPress={this.signOutUser}>
                     <Text style={{ color: 'white', fontSize: 30 }}>
                         Log Out
                      </Text>

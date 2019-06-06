@@ -13,7 +13,7 @@ import 'es6-symbol';
 import RadioGroup from 'react-native-radio-buttons-group';
 import apiKey from '../config/apiKey';
 import _ from 'lodash';
-import app from '../config/fire.js';
+import app from '../config/fire';
 import MapView, { PROVIDER_GOOGLE, Polyline, Marker } from 'react-native-maps';
 import PolyLine from '@mapbox/polyline';
 import ImageView from 'react-native-image-view';
@@ -54,6 +54,7 @@ export default class RegularUser extends Component {
             markerLng: null,
             unresponded: true,
             pinFinal:false,
+            additionalDetails:'',
             isResponding: false,
             isSettled: false,
             incidentID: '',
@@ -317,7 +318,7 @@ export default class RegularUser extends Component {
 
             if (incidentID !== "") {
                 console.log("hey i got here");
-                this.incidentIDListen = app.database().ref(`incidents/${incidentID}`)
+                this.incidentIDListen = app.database().ref(`incidents/${incidentID}`);
                 this.incidentIDListen.on('value', (snapshot) => {
                     incidentDetails = snapshot.val() || null;
                     var image_uri = incidentDetails.image_uri;
@@ -357,7 +358,7 @@ export default class RegularUser extends Component {
     incidentSettled = () => {
 
 
-        this.setState({ isSettled: true, isIncidentReady: false, hasResponderAlerted: false, hasVolunteerAlerted: false });
+        this.setState({ isSettled: true, isIncidentReady: false, hasResponderAlerted: false, hasVolunteerAlerted: false ,incidentLocation:'',pinUpdate:false});
         this.setState({ markerCoords: null });
 
         Alert.alert(
@@ -370,7 +371,7 @@ export default class RegularUser extends Component {
             { cancelable: false }
         );
 
-        var regularListen = app.database().ref(`mobileUsers/Regular User/${this.state.userId}`)
+        var regularListen = app.database().ref(`mobileUsers/Regular User/${this.state.userId}`);
         regularListen.update({
             incidentID: '',
         })
@@ -386,7 +387,7 @@ export default class RegularUser extends Component {
     incidentResponderListener = (incidentID) => {
         console.log("naa ka diri?", incidentID);
         console.log("hi there", this.state.incidentID);
-        this.responderListen = app.database().ref(`incidents/${incidentID}`)
+        this.responderListen = app.database().ref(`incidents/${incidentID}`);
         var that = this;
         var responderRespondingID = '';
         // var hasResponderAlerted = this.state.hasResponderAlerted;
@@ -602,6 +603,7 @@ export default class RegularUser extends Component {
         app.database().ref("/incidents").push({
             incidentType: this.state.incidentType,
             incidentLocation: this.state.incidentLocation,
+            additionalDetails:this.state.additionalDetails,
             unresponded: true,
             isResponding: false,
             isSettled: false,
@@ -776,10 +778,16 @@ export default class RegularUser extends Component {
         )
     }
 
+    checkState =()=>
+    {
+        alert(JSON.stringify(this.state.isIncidentReady))
+    }
+
     usePinLocation = () => 
     {
         Alert.alert("Long Press Marker and Move to Desired Location!")
         this.setState({incidentLocation:'Pinned Location',
+        isSettled:false,
         pinUpdate:true,
         destinationPlaceId:'Pinned Location',
         isModalVisible: !this.state.isModalVisible,
@@ -807,13 +815,14 @@ export default class RegularUser extends Component {
         ];
         console.log("marekr coords", this.state.markerLat, this.state.markerLng, this.state.isSettled);
         let marker = null;
-        if (this.state.markerLat && this.state.pinFinal===false) {
+        if (this.state.markerLat && this.state.isIncidentReady===false) {
          const { pointCoords } = this.state;
 
             marker = (
                 
                 <Marker
                 draggable
+                onPress={this.checkState}
                 onDragEnd={
                     (e)=>{this.setState({
                         markerLat:e.nativeEvent.coordinate.latitude,
@@ -839,10 +848,11 @@ export default class RegularUser extends Component {
             )
         }
 
-        else if (this.state.markerLat && this.state.pinFinal===true){
+        else if (this.state.markerLat && this.state.isIncidentReady===true){
             marker = (
                 
                 <Marker
+                
                     coordinate={
                         {
                             latitude: this.state.markerLat,
@@ -1040,7 +1050,7 @@ export default class RegularUser extends Component {
                         fontSize: 20,
                         fontWeight: 'bold',
                         textAlign: 'center',
-                        marginTop: 20,
+                        marginTop: 5,
                         marginBottom: 15
                     }}>INPUT INCIDENT
                     </Text>
@@ -1073,7 +1083,18 @@ export default class RegularUser extends Component {
                         value={this.state.incidentLocation}
 
                     />
+                
                     }
+                      <TextInput
+                    
+                    placeholder="Additional Details"
+                    style={styles.detailsInput}
+                    onChangeText={additionalDetails => {
+                        this.setState({ additionalDetails });
+                    }}
+                    value={this.state.additionalDetails}
+                    multiline
+                      />
                     {locationPredictions}
                     
                     <Button
@@ -1172,6 +1193,18 @@ const styles = StyleSheet.create({
         padding: 10,
         alignItems: 'center',
         marginBottom: 15
+    },
+    detailsInput:{
+        borderWidth: 0.5,
+        borderColor: "grey",
+        height: 40,
+        marginTop: 10,
+        marginLeft: 20,
+        flexWrap: "wrap",
+        marginRight: 20,
+        padding: 5,
+        backgroundColor: "white"
+
     },
     container: {
         ...StyleSheet.absoluteFillObject,

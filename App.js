@@ -11,16 +11,15 @@ import LoadingScreen from './src/components/LoadingScreen';
 import Login from './src/components/Login';
 import Register from './src/components/Register';
 import OpenAppSettings from 'react-native-app-settings'
-
-
 import 'babel-polyfill';
 import 'es6-symbol'
 import { YellowBox } from 'react-native';
 import _ from 'lodash';
 import app from './src/config/fire';
+import fire2 from './src/config/fire'
 
 import { Actions, Scene, Router, Stack } from 'react-native-router-flux';
-
+console.reportErrorsAsExceptions = false;
 YellowBox.ignoreWarnings(['Setting a timer']);
 const _console = _.clone(console);
 console.warn = message => {
@@ -105,6 +104,19 @@ export default class App extends Component {
     });
 
   }
+  
+  signOutUser() {
+    app.auth().signOut().then(function () {
+        // Sign-out successful.
+
+        console.log("SUCCESFULL LOG OUT");
+
+    }).catch(function (error) {
+        // An error happened.
+        console.log(error);
+    });
+
+}
   userDetails = () => {
     let userValue = "";
     console.log("userr", this.state.userId);
@@ -114,9 +126,33 @@ export default class App extends Component {
       console.log("user values", userValue);
       this.setState({ userType: userValue.user_type, isVerified: userValue.isVerified });
       this.setState({ userAccount: userValue });
+      // if (fire2.auth().currentUser.emailVerified===false)
+      // {
+      //   alert(JSON.stringify(fire2.auth().currentUser.emailVerified))
+      //   this.setState({ user: null, userId: null, userAccount: null, isVerified: false, userType: false });
+      //   console.log("user not verified");
+      //   Alert.alert(
+      //     "Email Address is not Verified",
+      //     `Check Email Address for Verification Email`
+      //     ,
+      //     [
+      //       { text: "Ok", onPress: () => { this.signOutUser() } },
+      //     ],
+      //     { cancelable: false }
+      //   );
+
+      // }
+      // else if (fire2.auth().currentUser.emailVerified===true && this.state.isVerified===false)
+      // {
+      //     fire2.database().ref('unverifiedMobileUsers/' + this.state.userId).update({
+      //       user_type: this.state.userType,
+      //   })
+        
+      // }
       if (this.state.isVerified === true) {
         this.rerouteUserAccess();
-      } else {
+      } 
+      else {
         this.setState({ user: null, userId: null, userAccount: null, isVerified: false, userType: false });
         console.log("user not verified");
         Alert.alert(
@@ -124,7 +160,7 @@ export default class App extends Component {
           `Command center must verify user`
           ,
           [
-            { text: "Ok", onPress: () => { console.log("ok") } },
+            { text: "Ok", onPress: () => { this.signOutUser() } },
           ],
           { cancelable: false }
         );
