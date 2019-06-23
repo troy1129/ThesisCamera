@@ -80,7 +80,9 @@ getUserInfo = () => {
 }
 
 
-
+doSendEmailVerification = () =>{
+  app.auth().currentUser.sendEmailVerification()
+  }
 
 reAuthPassword = (currentPassword) =>
 {
@@ -114,6 +116,7 @@ onChangeEmail = (values) =>
                 ],
                 {cancelable: false},
               )
+            ).then(this.doSendEmailVerification()
             )
         }).catch((error)=>{
             alert(JSON.stringify(error))
@@ -192,17 +195,17 @@ render()
             currentPassword: yup
               .string()
               .strict(true)
-              .matches( /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/, 'Password must be 8 characters long and contain One(1) Lower Case Letter, Upper Case Letter, Number, and Special Character.')              .trim('Password contains Special Characters')
+              // .matches( /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/, 'Password must be 8 characters long and contain One(1) Lower Case Letter, Upper Case Letter, Number, and Special Character.')              .trim('Password contains Special Characters')
               .required('Enter Current Password'),
               newPassword: yup
               .string()
               .strict(true)
-              .matches( /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/, 'Password must be 8 characters long and contain One(1) Lower Case Letter, Upper Case Letter, Number, and Special Character.')              .trim('Name cannot contain Special Characters or Numbers')
+              // .matches( /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/, 'Password must be 8 characters long and contain One(1) Lower Case Letter, Upper Case Letter, Number, and Special Character.')              .trim('Name cannot contain Special Characters or Numbers')
               .required('Password is Required'),
               confirmNewPassword: yup
               .string()
               .strict(true)
-              .matches( /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/, 'Password must be 8 characters long and contain One(1) Lower Case Letter, Upper Case Letter, Number, and Special Character.')              .trim('Name cannot contain Special Characters or Numbers')
+              // .matches( /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/, 'Password must be 8 characters long and contain One(1) Lower Case Letter, Upper Case Letter, Number, and Special Character.')              .trim('Name cannot contain Special Characters or Numbers')
               .required('You Must Confirm Password')
               .when("newPassword", {
                   is: val => (val && val.length > 0 ? true : false),
@@ -268,54 +271,7 @@ render()
               disabled={(!isValid)}
               onPress={handleSubmit}>Change Password</Button>
 
-        {/* <TextInput style={styles.inputBox}
-              underlineColorAndroid='rgba(0,0,0,0)'
-              placeholder={this.state.firstName}
-              placeholderTextColor="#ffffff"
-              selectionColor="#fff"
-              keyboardType="email-address"
-              value={this.state.firstName}
-            //   onBlur={() => setFieldTouched('currentPassword')}
-            onChangeText={firstName => {
-                this.setState({ firstName });
-            }     }       /> 
-          
-        <TextInput style={styles.inputBox}
-              underlineColorAndroid='rgba(0,0,0,0)'
-              placeholder={this.state.lastName}
-              placeholderTextColor="#ffffff"
-              selectionColor="#fff"
-              keyboardType="email-address"
-              value={this.state.lastName}
-            //   onBlur={() => setFieldTouched('currentPassword')}
-            onChangeText={lastName => {
-                this.setState({ lastName });
-            }     }       /> 
-              <Button onPress={this.onChangeDetails}>Change Details</Button>
-
-              <TextInput style={styles.inputBox}
-                underlineColorAndroid='rgba(0,0,0,0)'
-                placeholder={values.email}
-                placeholderTextColor="#ffffff"
-                selectionColor="#fff"
-                keyboardType="email-address"
-                value={values.email}
-                onChangeText={handleChange('email')}
-                onBlur={() => setFieldTouched('email')}  /> 
-
-              <TextInput style={styles.inputBox}
-              underlineColorAndroid='rgba(0,0,0,0)'
-              placeholder="Current Password"
-              placeholderTextColor="#ffffff"
-              selectionColor="#fff"
-              keyboardType="email-address"
-              value={this.state.currentPasswordEmail}
-            //   onBlur={() => setFieldTouched('currentPassword')}
-            onChangeText={currentPasswordEmail => {
-                this.setState({ currentPasswordEmail:currentPasswordEmail });
-            }     }       /> 
-           
-           <Button onPress={this.onChangeEmail}>Change Email</Button> */}
+    
  </View>
         ) }
       </Formik>
@@ -394,7 +350,7 @@ render()
             currentPasswordEmail: yup
               .string()
               .strict(true)
-              .matches( /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/, 'Password must be 8 characters long and contain One(1) Lower Case Letter, Upper Case Letter, Number, and Special Character.')              .trim('Password contains Special Characters')
+              // .matches( /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/, 'Password must be 8 characters long and contain One(1) Lower Case Letter, Upper Case Letter, Number, and Special Character.')              .trim('Password contains Special Characters')
               .required('Enter Current Password'),
           })
         

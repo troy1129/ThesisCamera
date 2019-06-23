@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 #Mon Jun 24 07:17:30 CST 2019
+=======
+#Mon Jun 24 04:00:37 CST 2019
+>>>>>>> eff8c454d8c4b9279d278852e9abec3e8fc94c70
 base.0=E\:\\THESIS STUFF\\JuneLatestUpdate\\ThesisCamera-miranda (1)\\ThesisCamera-miranda\\android\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\0
 path.0=classes.dex
 renamed.0=classes.dex

@@ -249,7 +249,7 @@ class Register extends Component {
         const auth = fire2.auth();
         const promise = auth.createUserWithEmailAndPassword(email.trim(), password.trim());
         promise.then(user => {
-            this.doSendEmailVerification()
+            // this.doSendEmailVerification()
             let points=this.computePoints()
             Alert.alert(JSON.stringify(`Account ${values.email} has been created, 
             Please check your Email Address to Verify your account!`))
@@ -304,7 +304,8 @@ class Register extends Component {
                 password: values.password,
                 firstName: values.firstName,
                 lastName: values.lastName,
-                gender: values.gender,
+                gender: this.state.gender,
+                address:values.address,
                 incidentId:'',
                 isAccepted:false,
                 contactNumber: values.contactNumber,
@@ -360,7 +361,7 @@ class Register extends Component {
           
       
         return (
-            <Formik initialValues={{ firstName: '', lastName: '', email: '', gender: '', contactNumber: '', password: '', confirmPassword: '' ,medicalProfession:''}}
+            <Formik initialValues={{ firstName: '', lastName: '', email: '', gender: '', contactNumber: '', password: '', confirmPassword: '' ,medicalProfession:'',address:''}}
                 onSubmit={values => {
                     this.createUserAccount(values);
 
@@ -400,6 +401,11 @@ class Register extends Component {
                             .strict(true)
                             .matches( /^.*(?=.{8,})((?=.*[!@#$%^&*()\-_=+{};:,<.>]){1})(?=.*\d)((?=.*[a-z]){1})((?=.*[A-Z]){1}).*$/, 'Password must be 8 characters long and contain One(1) Lower Case Letter, Upper Case Letter, Number, and Special Character.')
                             .trim('Password cannot contain Spaces')
+                            .required('Password is Required'),
+                        
+                        address:yup
+                            .string()
+                            .strict(true)
                             .required('Password is Required'),
                         confirmPassword: yup
                             .string()
@@ -472,6 +478,21 @@ class Register extends Component {
                         {touched.contactNumber && errors.contactNumber &&
                             <Text style={{ fontSize: 15, color: 'red' }}>{errors.contactNumber}</Text>
                         }
+
+                        <TextInput style={styles.inputBox}
+                            underlineColorAndroid='rgba(0,0,0,0)'
+                            placeholder="Address"
+                            secureTextEntry={true}
+                            placeholderTextColor="#ffffff"
+                            value={values.address}
+                            onChangeText={handleChange('address')}
+                            onBlur={() => setFieldTouched('address')}
+
+                        />
+                         {touched.address && errors.address &&
+                            <Text style={{ fontSize: 15, color: 'red' }}>{errors.address}</Text>
+                        }
+
                     
                          <RNPickerSelect
                             placeholder={placeholderGender}
@@ -482,7 +503,7 @@ class Register extends Component {
                              });
                           }}
                           style={pickerSelectStyles}
-                          value={this.state.medicalDegree}
+                          value={this.state.gender}
                           />
                         <TextInput style={styles.inputBox}
                             underlineColorAndroid='rgba(0,0,0,0)'
@@ -510,6 +531,8 @@ class Register extends Component {
                             {touched.confirmPassword && errors.confirmPassword &&
                             <Text style={{ fontSize: 15, color: 'red' }}>{errors.confirmPassword}</Text>
                         }
+
+                        
 
                         {this.state.user_type === 'Volunteer' ? 
                          <RNPickerSelect

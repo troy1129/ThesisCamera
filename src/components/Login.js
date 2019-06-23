@@ -98,7 +98,7 @@ class Login extends Component {
             password: yup
               .string()
               .strict(true)
-              .matches(/[a-zA-Z0-9]/, 'Password contains Special Characte')
+              // .matches(/[a-zA-Z0-9]/, 'Password contains Special Characte')
               .trim('Password contains Special Characters')
               .required('Password is Required'),
           })

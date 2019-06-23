@@ -130,6 +130,22 @@ export default class App extends Component {
     });
 
 }
+signOutUserEmail()
+{
+  app.auth().signOut().then(function () {
+    // Sign-out successful.
+
+    console.log("SUCCESFULL LOG OUT");
+
+}).then(
+ app.auth().currentUser.sendEmailVerification()
+
+).catch(function (error) {
+    // An error happened.
+    console.log(error);
+});
+
+}
   userDetails = () => {
     let userValue = "";
     console.log("userr", this.state.userId);
@@ -139,46 +155,56 @@ export default class App extends Component {
       console.log("user values", userValue);
       this.setState({ userType: userValue.user_type, isVerified: userValue.isVerified, incidentID:userValue.incidentId, isAccepted:userValue.isAccepted });
       this.setState({ userAccount: userValue });
-      if (fire2.auth().currentUser.emailVerified===false)
-      {
-        alert(JSON.stringify(fire2.auth().currentUser.emailVerified))
-        this.setState({ user: null, userId: null, userAccount: null, isVerified: false, userType: false });
-        console.log("user not verified");
-        Alert.alert(
-          "Email Address is not Verified",
-          `Check Email Address for Verification Email`
-          ,
-          [
-            { text: "Ok", onPress: () => { this.signOutUser() } },
-          ],
-          { cancelable: false }
-        );
+      // if (fire2.auth().currentUser.emailVerified===false && this.state.isVerified===false)
+      // {
+      //   this.setState({ user: null, userId: null, userAccount: null, isVerified: false, userType: false });
+      //   console.log("user not verified");
+      //   Alert.alert(
+      //     "Email Address is not Verified",
+      //     `Check Email Address for Verification Email`
+      //     ,
+      //     [
+      //       { text: "Ok", onPress: () => { this.signOutUser() } },
+      //     ],
+      //     { cancelable: false }
+      //   );
 
-      }
-      else if (fire2.auth().currentUser.emailVerified===true && this.state.isVerified===false)
-      {
-          fire2.database().ref('unverifiedMobileUsers/' + this.state.userId).update({
-            user_type: this.state.userType,
-        })
+      // }
+      // else if (fire2.auth().currentUser.emailVerified===true && this.state.isVerified===false)
+      // {
         
-      }
-      if (this.state.isVerified === true) {
+      //   console.log("user not verified");
+      //   Alert.alert(
+      //     "User is not verified",
+      //     `Command center must verify user`
+      //     ,
+      //     [
+      //       { text: "Ok", onPress: () => { this.signOutUser() } },
+      //     ],
+      //     { cancelable: false }
+      //   );
+      //     fire2.database().ref('unverifiedMobileUsers/'+this.state.userId).update({
+      //       user_type: this.state.userType,
+      //   })
+        
+      // }
+      // else if (this.state.isVerified === true && fire2.auth().currentUser.emailVerified===true) {
         this.rerouteUserAccess();
-      } 
-      else {
-        this.setState({ user: null, userId: null, userAccount: null, isVerified: false, userType: false });
-        console.log("user not verified");
-        Alert.alert(
-          "User is not verified",
-          `Command center must verify user`
-          ,
-          [
-            { text: "Ok", onPress: () => { this.signOutUser() } },
-          ],
-          { cancelable: false }
-        );
+      // } 
+      // else if(this.state.isVerified === true && fire2.auth().currentUser.emailVerified===false){
+      //   this.setState({ user: null, userId: null, userAccount: null, isVerified: false, userType: false });
+      //   console.log("user not verified");
+      //   Alert.alert(
+      //     "User is not verified",
+      //     `Command center must verify user`
+      //     ,
+      //     [
+      //       { text: "Ok", onPress: () => { this.signOutUserEmail() } },
+      //     ],
+      //     { cancelable: false }
+      //   );
 
-      }
+      // }
 
       // this.props.logUser(this.state.userAccount);
     }).catch(err => console.log(err));
