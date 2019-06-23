@@ -75,7 +75,7 @@ export default class Responder extends Component {
             markerLng:null,
             image_uri:'',
             isImageViewVisible: false,
-            incidentType: "",
+            incidentType: "Vehicular Accident",
             incidentLocation: "",
             firstName: "",
             lastName: "",
@@ -309,6 +309,11 @@ export default class Responder extends Component {
         let incidentID = this.state.incidentId;
         let userId = this.state.userId;
         console.log("is settled?", incidentID, userId);
+
+        if(this.state.didSettle){
+            this._toggleModal2
+        }
+
         app.database().ref(`users/${userId}`).update({
             incidentId:'',
             isAccepted:false,
@@ -322,10 +327,6 @@ export default class Responder extends Component {
         responderListen.update({
             incidentID: '',
             isAccepted: false,
-        }).then(()=>{
-            if(this.state.didSettle){
-                this._toggleModal2
-            }
         })
 
     }
@@ -843,7 +844,7 @@ export default class Responder extends Component {
  incidentType: this.state.incidentType,
  incidentLocation: this.state.incidentLocation,
  incidentNote:this.state.incidentNote,
- timeReceived: date1,
+ timeReceived: date,
  image_uri: this.state.image_uri,
  isResponding: true,
  markerLat:this.state.markerLat,
@@ -852,7 +853,7 @@ export default class Responder extends Component {
  reporterName: fullName,
  responderResponding: '',
  volunteerResponding: '',
- originalResponderName: '',
+ originalResponderName: fullName,
  originalVolunteerName:'',
  coordinates: {
  lat: coordLat,

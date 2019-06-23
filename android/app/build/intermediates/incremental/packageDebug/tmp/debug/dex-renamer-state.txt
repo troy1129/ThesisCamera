@@ -1,4 +1,4 @@
-#Wed Jun 19 18:44:09 SGT 2019
-base.0=C\:\\Users\\Acer\\Desktop\\thesismobile\\thesisupdated\\ThesisCamera-Patrick\\android\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\0
+#Mon Jun 24 07:17:30 CST 2019
+base.0=E\:\\THESIS STUFF\\JuneLatestUpdate\\ThesisCamera-miranda (1)\\ThesisCamera-miranda\\android\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\0
 path.0=classes.dex
 renamed.0=classes.dex

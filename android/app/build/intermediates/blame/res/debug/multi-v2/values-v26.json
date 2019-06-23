@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "C:\\Users\\Acer\\Desktop\\thesismobile\\thesisupdated\\ThesisCamera-Patrick\\android\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-v26\\values-v26.xml",
+            "outputFile": "E:\\THESIS STUFF\\JuneLatestUpdate\\ThesisCamera-miranda (1)\\ThesisCamera-miranda\\android\\app\\build\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values-v26\\values-v26.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Acer\\.gradle\\caches\\transforms-1\\files-1.1\\appcompat-v7-28.0.0.aar\\18cf7f095cb4f9d0830d6eb96c5b9735\\res\\values-v26\\values-v26.xml",
+                    "source": "C:\\Users\\NOC\\.gradle\\caches\\transforms-1\\files-1.1\\appcompat-v7-28.0.0.aar\\47e127b4a9bb1411fff2300e7cdcc085\\res\\values-v26\\values-v26.xml",
                     "from": {
                         "startLines": "2,3,4,8,12,16",
                         "startColumns": "4,4,4,4,4,4",
